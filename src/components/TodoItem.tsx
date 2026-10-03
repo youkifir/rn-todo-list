@@ -1,4 +1,3 @@
-import type { Todo } from "@/types";
 import { useState } from "react";
 import {
     StyleSheet,
@@ -7,10 +6,13 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/context/ThemeContext";
+import type { Todo } from "@/types";
 
 interface TodoItemProps {
     todo: Todo;
-    onToggle: (id: string, completed: boolean) => Promise<void>;
+    onToggle: (id: string) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
     onEdit: (id: string, text: string) => Promise<void>;
 }
@@ -18,6 +20,7 @@ interface TodoItemProps {
 export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(todo.text);
+    const { colors } = useTheme();
 
     const handleSaveEdit = async () => {
         const trimmedText = editText.trim();
@@ -30,17 +33,26 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
     };
 
     return (
-        <View style={styles.card}>
-            <TouchableOpacity
-                style={[styles.checkbox, todo.completed && styles.checkboxChecked]}
-                onPress={() => onToggle(todo.id, !todo.completed)}
-            >
-                {todo.completed && <Text style={styles.checkmark}>✓</Text>}
+        <View
+            style={[
+                styles.card,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+        >
+            <TouchableOpacity onPress={() => onToggle(todo.id)} style={styles.checkboxWrapper}>
+                <Ionicons
+                    name={todo.completed ? "checkmark-circle" : "ellipse-outline"}
+                    size={24}
+                    color={todo.completed ? colors.success : colors.textMuted}
+                />
             </TouchableOpacity>
 
             {isEditing ? (
                 <TextInput
-                    style={styles.editInput}
+                    style={[
+                        styles.editInput,
+                        { color: colors.text, borderBottomColor: colors.primary },
+                    ]}
                     value={editText}
                     onChangeText={setEditText}
                     onBlur={handleSaveEdit}
@@ -53,7 +65,11 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
                     onPress={() => setIsEditing(true)}
                 >
                     <Text
-                        style={[styles.todoText, todo.completed && styles.todoTextCompleted]}
+                        style={[
+                            styles.todoText,
+                            { color: colors.text },
+                            todo.completed && [styles.completedText, { color: colors.textMuted }],
+                        ]}
                     >
                         {todo.text}
                     </Text>
@@ -64,7 +80,7 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
                 style={styles.deleteButton}
                 onPress={() => onDelete(todo.id)}
             >
-                <Text style={styles.deleteText}>✕</Text>
+                <Ionicons name="trash-outline" size={20} color={colors.danger} />
             </TouchableOpacity>
         </View>
     );
@@ -74,57 +90,31 @@ const styles = StyleSheet.create({
     card: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#ffffff",
         padding: 12,
         borderRadius: 8,
         marginBottom: 8,
         borderWidth: 1,
-        borderColor: "#e5e7eb",
     },
-    checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 6,
-        borderWidth: 2,
-        borderColor: "#6366f1",
-        justifyContent: "center",
-        alignItems: "center",
+    checkboxWrapper: {
         marginRight: 12,
-    },
-    checkboxChecked: {
-        backgroundColor: "#6366f1",
-    },
-    checkmark: {
-        color: "#ffffff",
-        fontSize: 14,
-        fontWeight: "bold",
     },
     textWrapper: {
         flex: 1,
     },
     todoText: {
         fontSize: 16,
-        color: "#1f2937",
     },
-    todoTextCompleted: {
+    completedText: {
         textDecorationLine: "line-through",
-        color: "#9ca3af",
     },
     editInput: {
         flex: 1,
         fontSize: 16,
-        color: "#1f2937",
         paddingVertical: 0,
         borderBottomWidth: 1,
-        borderBottomColor: "#6366f1",
     },
     deleteButton: {
         padding: 6,
         marginLeft: 8,
-    },
-    deleteText: {
-        color: "#ef4444",
-        fontSize: 16,
-        fontWeight: "bold",
     },
 });

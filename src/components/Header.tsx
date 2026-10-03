@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 interface HeaderProps {
     totalCount: number;
@@ -6,12 +7,14 @@ interface HeaderProps {
 }
 
 export function Header({ totalCount, completedCount }: HeaderProps) {
+    const { colors } = useTheme();
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Мои задачи</Text>
-            <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                    {completedCount} из {totalCount}
+            <Text style={[styles.title, { color: colors.text }]}>Мій список завдань</Text>
+            <View style={[styles.badge, { backgroundColor: colors.primary + "20" }]}>
+                <Text style={[styles.badgeText, { color: colors.primary }]}>
+                    {completedCount} з {totalCount}
                 </Text>
             </View>
         </View>
@@ -28,16 +31,13 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: "bold",
-        color: "#1f2937",
     },
     badge: {
-        backgroundColor: "#e0e7ff",
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
     },
     badgeText: {
-        color: "#4f46e5",
         fontSize: 14,
         fontWeight: "600",
     },

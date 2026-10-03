@@ -1,29 +1,23 @@
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 import type { Todo } from "@/types";
-import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { TodoItem } from "./TodoItem";
 
 interface TodoListProps {
     todos: Todo[];
-    refreshing: boolean;
-    onRefresh: () => Promise<void>;
-    onToggle: (id: string, completed: boolean) => Promise<void>;
+    onToggle: (id: string) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
     onEdit: (id: string, text: string) => Promise<void>;
 }
 
-export function TodoList({
-    todos,
-    refreshing,
-    onRefresh,
-    onToggle,
-    onDelete,
-    onEdit,
-}: TodoListProps) {
+export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
+    const { colors } = useTheme();
+
     if (todos.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                    Список задач пуст. Добавьте новую задачу!
+                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                    Список завдань порожній. Додайте нове завдання!
                 </Text>
             </View>
         );
@@ -43,13 +37,6 @@ export function TodoList({
             )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={["#6366f1"]}
-                />
-            }
         />
     );
 }
@@ -65,7 +52,6 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: "#6b7280",
         textAlign: "center",
     },
 });

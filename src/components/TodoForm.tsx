@@ -7,14 +7,17 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/context/ThemeContext";
 
 interface TodoFormProps {
     onAdd: (text: string) => Promise<void>;
-    loading: boolean;
+    loading?: boolean;
 }
 
-export function TodoForm({ onAdd, loading }: TodoFormProps) {
+export function TodoForm({ onAdd, loading = false }: TodoFormProps) {
     const [text, setText] = useState("");
+    const { colors } = useTheme();
 
     const handleSubmit = async () => {
         const trimmedText = text.trim();
@@ -29,23 +32,35 @@ export function TodoForm({ onAdd, loading }: TodoFormProps) {
         }
     };
 
+    const isDisabled = !text.trim() || loading;
+
     return (
         <View style={styles.container}>
             <TextInput
-                style={styles.input}
-                placeholder="Что нужно сделать?"
-                placeholderTextColor="#9ca3af"
+                style={[
+                    styles.input,
+                    {
+                        backgroundColor: colors.bg,
+                        color: colors.text,
+                        borderColor: colors.border,
+                    },
+                ]}
+                placeholder="Що потрібно зробити?"
+                placeholderTextColor={colors.textMuted}
                 value={text}
                 onChangeText={setText}
                 onSubmitEditing={handleSubmit}
                 returnKeyType="done"
             />
             <TouchableOpacity
-                style={[styles.button, (!text.trim() || loading) && styles.buttonDisabled]}
+                style={[
+                    styles.button,
+                    { backgroundColor: isDisabled ? colors.primary + "60" : colors.primary },
+                ]}
                 onPress={handleSubmit}
-                disabled={!text.trim() || loading}
+                disabled={isDisabled}
             >
-                <Text style={styles.buttonText}>Добавить</Text>
+                <Ionicons name="add" size={24} color="#ffffff" />
             </TouchableOpacity>
         </View>
     );
@@ -60,26 +75,16 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: 48,
-        backgroundColor: "#f3f4f6",
         borderRadius: 8,
         paddingHorizontal: 16,
         fontSize: 16,
-        color: "#1f2937",
+        borderWidth: 1,
     },
     button: {
+        width: 48,
         height: 48,
-        backgroundColor: "#6366f1",
         borderRadius: 8,
-        paddingHorizontal: 20,
         justifyContent: "center",
         alignItems: "center",
-    },
-    buttonDisabled: {
-        backgroundColor: "#a5b4fc",
-    },
-    buttonText: {
-        color: "#ffffff",
-        fontSize: 16,
-        fontWeight: "600",
     },
 });
