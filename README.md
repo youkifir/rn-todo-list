@@ -10,21 +10,12 @@
   <h3>📱 Інтерфейс додатка</h3>
   
   <!-- Замініть посилання на свої фото/скріншоти -->
-  <img src="./assets/screenshots/todos-screen.png" width="280" alt="Список завдань" />
-  <img src="./assets/screenshots/stats-screen.png" width="280" alt="Статистика" />
-  <img src="./assets/screenshots/settings-screen.png" width="280" alt="Налаштування" />
-</div>
-
-<br />
-
-<div align="center">
-  <h3>⚡ Real-Time синхронізація в дії</h3>
-  
  <img width="1919" height="943" alt="изображение" src="https://github.com/user-attachments/assets/ce81350f-29b9-4441-b73a-b0991d45ac6a" />
  <img width="1919" height="947" alt="изображение" src="https://github.com/user-attachments/assets/3c10215b-fbec-40d9-ad2e-bae11a1a9311" />
  <img width="1919" height="945" alt="изображение" src="https://github.com/user-attachments/assets/838da42d-2151-4da2-af21-e698afb80397" />
-
 </div>
+
+<br />
 
 ---
 
