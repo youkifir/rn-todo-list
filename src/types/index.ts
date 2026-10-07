@@ -1,10 +1,12 @@
 import { StatusBarStyle } from "expo-status-bar";
+import { Id } from "../../convex/_generated/dataModel";
 
 export interface Todo {
-  id: string;
+  _id: Id<"todos">; // Convex використовує _id замість id
   text: string;
-  completed: boolean;
+  isCompleted: boolean; // замість completed
   createdAt: number;
+  _creationTime?: number;
 }
 
 export type ThemeMode = "light" | "dark";
@@ -35,7 +37,7 @@ export interface TodoContextType {
   addTodo: (text: string) => Promise<void>;
   toggleTodo: (id: string) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
-  editTodo: (id: string, text: string) => Promise<void>;
+  editTodo?: (id: string, newText: string) => Promise<void>;
   clearCompleted: () => Promise<void>;
   clearAll: () => Promise<void>;
 }
