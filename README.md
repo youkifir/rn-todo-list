@@ -1,56 +1,65 @@
-# Welcome to your Expo app 👋
+# 📱 Todo App 3.0 — Real-Time Todo List (React Native + Expo Router + Convex)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Сучасний мобільний додаток для управління завданнями, побудований на **React Native**, **Expo Router** та облачному бекенді **Convex**. Додаток підтримує автоматичну Real-Time синхронізацію даних між пристроями, локальне збереження темного/світлого оформлення та аналітику продуктивності на стороні сервера.
 
-## Get started
+---
 
-1. Install dependencies
+## 📸 Скріншоти та Демонстрація
 
-   ```bash
-   npm install
-   ```
+<div align="center">
+  <h3>📱 Інтерфейс додатка</h3>
+  
+  <!-- Замініть посилання на свої фото/скріншоти -->
+ <img width="1919" height="943" alt="изображение" src="https://github.com/user-attachments/assets/ce81350f-29b9-4441-b73a-b0991d45ac6a" />
+ <img width="1919" height="947" alt="изображение" src="https://github.com/user-attachments/assets/3c10215b-fbec-40d9-ad2e-bae11a1a9311" />
+ <img width="1919" height="945" alt="изображение" src="https://github.com/user-attachments/assets/838da42d-2151-4da2-af21-e698afb80397" />
+</div>
 
-2. Start the app
+<br />
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## ✨ Основні можливості
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **🚀 Real-Time Синхронізація (Convex):** Будь-які зміни (додавання, редагування, статус виконання, видалення) миттєво відображаються на всіх підключених пристроях без ручного оновлення.
+- **📊 Серверна Аналітика:** Автоматичний розрахунок продуктивності (всього, в процесі, виконано, % прогресу) безпосередньо через бекенд-запити Convex (`getStats`).
+- **📝 Повний CRUD & Масове очищення:**
+  - Створення завдань із валідацією порожніх рядків.
+  - Перемикання статусу та інлайн-редагування тексту.
+  - Масове видалення виконаних завдань або повне очищення бази даних з безпечним підтвердженням.
+- **🎨 Перемикання тем (Light / Dark):** Підтримка світлої та темної теми із збереженням налаштувань у пам'яті пристрою через `AsyncStorage` та `ThemeContext`.
+- **📂 Файловий роутинг:** Побудовано на `Expo Router` із розділенням на вкладки (`app/(tabs)/`).
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🛠 Технологічний стек
 
-When you're ready, run:
+* **Frontend:** React Native, Expo, Expo Router, TypeScript
+* **UI & Стилі:** React Native StyleSheet, Expo Vector Icons (`@expo/vector-icons`), Safe Area Context
+* **Backend & Database:** Convex (Cloud Reactive Database, TypeScript Server Functions)
+* **Локальне збереження:** React Native Async Storage (для тем)
 
-```bash
-npm run reset-project
-```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📁 Структура проєкту
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```text
+rn-todo-list/
+├── app/
+│   ├── (tabs)/
+│   │   ├── _layout.tsx        # Конфігурація таб-бару
+│   │   ├── index.tsx          # 📝 Вкладка 1: Список завдань (useQuery, useMutation)
+│   │   ├── stats.tsx          # 📊 Вкладка 2: Статистика (useQuery)
+│   │   └── settings.tsx       # ⚙️ Вкладка 3: Налаштування теми та масового очищення
+│   └── _layout.tsx            # Кореневий макет (ConvexProvider + ThemeProvider)
+├── components/
+│   ├── Header.tsx             # Заголовок та лічильник
+│   ├── TodoForm.tsx           # Форма створення нового завдання
+│   ├── TodoItem.tsx           # Окремий елемент завдання
+│   └── TodoList.tsx           # Список FlatList із лоадером
+├── context/
+│   └── ThemeContext.tsx       # Контекст тем (Light/Dark + AsyncStorage)
+├── convex/                    # 🚀 Хмарний бекенд Convex
+│   ├── schema.ts              # Схема бази даних (таблиця todos + індекси)
+│   └── todos.ts               # Серверні Queries та Mutations
+└── .env                       # Змінні оточення (EXPO_PUBLIC_CONVEX_URL)
