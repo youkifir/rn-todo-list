@@ -1,49 +1,65 @@
-import { query, mutation } from "./_generated/server";
-import { v, ConvexError } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { ConvexError, v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
-// 1. Получение всех задач (от новых к старым)
+// 1. Получение задач ТОЛЬКО авторизованного пользователя
 export const getTodos = query({
     args: {},
     handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            return [];
+        }
+
         return await ctx.db
             .query("todos")
-            .withIndex("by_created_at") // ✅ ИСПРАВЛЕНО: совпадает с schema.ts
+            .withIndex("by_user_creation", (q) => q.eq("userId", userId))
             .order("desc")
             .collect();
     },
 });
 
-// 2. Получение аналитики
+// 2. Статистика текущего пользователя
 export const getStats = query({
     args: {},
     handler: async (ctx) => {
-        const allTodos = await ctx.db.query("todos").collect();
-        const total = allTodos.length;
-        const completed = allTodos.filter((t) => t.isCompleted).length;
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            return { total: 0, completed: 0, active: 0, percentage: 0 };
+        }
+
+        const todos = await ctx.db
+            .query("todos")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .collect();
+
+        const total = todos.length;
+        const completed = todos.filter((t) => t.isCompleted).length;
         const active = total - completed;
         const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-        return {
-            total,
-            completed,
-            active,
-            percentage,
-        };
+        return { total, completed, active, percentage };
     },
 });
 
-// 3. Создание новой задачи
+// 3. Создание задачи для текущего пользователя
 export const createTodo = mutation({
     args: {
         text: v.string(),
     },
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Необходимо авторизоваться");
+        }
+
         const trimmedText = args.text.trim();
         if (trimmedText.length === 0) {
             throw new ConvexError("Текст задачи не может быть пустым");
         }
 
         return await ctx.db.insert("todos", {
+            userId,
             text: trimmedText,
             isCompleted: false,
             createdAt: Date.now(),
@@ -51,15 +67,20 @@ export const createTodo = mutation({
     },
 });
 
-// 4. Переключение статуса выполнения
+// 4. Переключение статуса задачи
 export const toggleTodo = mutation({
     args: {
         id: v.id("todos"),
     },
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Не авторизовано");
+        }
+
         const todo = await ctx.db.get(args.id);
-        if (!todo) {
-            throw new ConvexError("Задача не найдена");
+        if (!todo || todo.userId !== userId) {
+            throw new ConvexError("Задача не найдена или нет доступа");
         }
 
         await ctx.db.patch(args.id, {
@@ -75,6 +96,16 @@ export const updateTodo = mutation({
         text: v.string(),
     },
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Не авторизовано");
+        }
+
+        const todo = await ctx.db.get(args.id);
+        if (!todo || todo.userId !== userId) {
+            throw new ConvexError("Задача не найдена или нет доступа");
+        }
+
         const trimmed = args.text.trim();
         if (trimmed.length === 0) {
             throw new ConvexError("Текст задачи не может быть пустым");
@@ -92,16 +123,34 @@ export const deleteTodo = mutation({
         id: v.id("todos"),
     },
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Не авторизовано");
+        }
+
+        const todo = await ctx.db.get(args.id);
+        if (!todo || todo.userId !== userId) {
+            throw new ConvexError("Задача не найдена или нет доступа");
+        }
+
         await ctx.db.delete(args.id);
     },
 });
 
-// 7. Удаление всех завершённых задач
+// 7. Очистка выполненных задач пользователя
 export const clearCompleted = mutation({
     args: {},
     handler: async (ctx) => {
-        const allTodos = await ctx.db.query("todos").collect();
-        const completedTodos = allTodos.filter((t) => t.isCompleted);
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Не авторизовано");
+        }
+
+        const completedTodos = await ctx.db
+            .query("todos")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .filter((q) => q.eq(q.field("isCompleted"), true))
+            .collect();
 
         for (const todo of completedTodos) {
             await ctx.db.delete(todo._id);
@@ -111,14 +160,24 @@ export const clearCompleted = mutation({
     },
 });
 
-// 8. Полное очищение списка
+// 8. Очистка всех задач пользователя
 export const clearAll = mutation({
     args: {},
     handler: async (ctx) => {
-        const all = await ctx.db.query("todos").collect();
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            throw new ConvexError("Не авторизовано");
+        }
+
+        const all = await ctx.db
+            .query("todos")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .collect();
+
         for (const todo of all) {
             await ctx.db.delete(todo._id);
         }
+
         return { deletedCount: all.length };
     },
 });
